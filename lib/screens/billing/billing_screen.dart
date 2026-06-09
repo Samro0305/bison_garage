@@ -4,10 +4,9 @@ import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../providers/invoice_provider.dart';
-
+import '../../services/invoice_service.dart';
 import '../../models/invoice_model.dart';
 import '../../models/service_item_model.dart';
-
 import '../../widgets/service_item_tile.dart';
 
 class BillingScreen extends ConsumerStatefulWidget {
@@ -25,6 +24,8 @@ class _BillingScreenState
   final vehicleController = TextEditingController();
 
   bool gstEnabled = true;
+
+  
 
   final List<TextEditingController> serviceControllers = [];
   final List<TextEditingController> amountControllers = [];
@@ -103,7 +104,10 @@ class _BillingScreenState
   }
 
   final invoice = InvoiceModel(
-    invoiceId: const Uuid().v4(),
+  invoiceId: const Uuid().v4(),
+  invoiceNumber:
+    InvoiceService
+        .generateNextInvoiceNumber(),
     customerName: customerNameController.text.trim(),
     customerPhone: phoneController.text.trim(),
     vehicleNumber: vehicleController.text.trim(),
@@ -288,15 +292,18 @@ class _BillingScreenState
 
           const SizedBox(height: 20),
 
-          SizedBox(
-            height: 55,
-            child: ElevatedButton(
-              onPressed: saveInvoice,
-              child: const Text(
-                'SAVE INVOICE',
-              ),
-            ),
-          ),
+    Center(
+  child: SizedBox(
+    width: 180,
+    height: 50,
+    child: ElevatedButton(
+      onPressed: saveInvoice,
+      child: const Text(
+        'SAVE INVOICE',
+      ),
+    ),
+  ),
+),
         ],
       ),
     );

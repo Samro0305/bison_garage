@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../services/theme_service.dart';
+import '../../providers/theme_provider.dart';
 import '../billing/billing_screen.dart';
 import '../dashboard/dashboard_screen.dart';
 import '../history/history_screen.dart';
 import '../reports/reports_screen.dart';
 import '../settings/settings_screen.dart';
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  State<HomeScreen> createState() => _HomeScreenState();
+  ConsumerState<HomeScreen> createState() =>
+      _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int currentIndex = 0;
 
   final List<Widget> pages = const [
@@ -28,8 +32,24 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('BISON GARAGE'),
-      ),
+  title: GestureDetector(
+   onDoubleTap: () async {
+  final newValue =
+      !ref.read(darkModeProvider);
+
+  ref
+      .read(darkModeProvider.notifier)
+      .state = newValue;
+
+  await ThemeService.saveThemeMode(
+    newValue,
+  );
+},
+    child: const Text(
+      'BISON GARAGE',
+    ),
+  ),
+),
       body: pages[currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,

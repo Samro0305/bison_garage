@@ -7,4 +7,7 @@ final defaultGarageSettings =
   phoneNumber: '',
   address: '',
   gstNumber: '',
+  logoPath: '',
+  password: 'bison1234',
+  signaturePath: '',
 );

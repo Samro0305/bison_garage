@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'invoice_provider.dart';
 
+
 final totalRevenueProvider =
     Provider<double>((ref) {
   final invoices =

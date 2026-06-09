@@ -13,5 +13,8 @@ class HiveDatabase {
     await Hive.openBox(
       HiveBoxes.settingsBox,
     );
+
+    await Hive.openBox('themeBox');
   }
 }
+

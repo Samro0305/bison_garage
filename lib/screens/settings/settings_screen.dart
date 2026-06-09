@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
+import '../../providers/invoice_provider.dart';
 import '../../models/garage_settings_model.dart';
 import '../../services/settings_service.dart';
+import '../../services/backup_service.dart';
 
-class SettingsScreen extends StatefulWidget {
+class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
   @override
-  State<SettingsScreen> createState() =>
+  ConsumerState<SettingsScreen> createState() =>
       _SettingsScreenState();
 }
 
 class _SettingsScreenState
-    extends State<SettingsScreen> {
+    extends ConsumerState<SettingsScreen> {
+
   final garageNameController =
       TextEditingController();
 
@@ -27,6 +33,18 @@ class _SettingsScreenState
 
   final gstController =
       TextEditingController();
+
+  final currentPasswordController =
+    TextEditingController();
+
+final newPasswordController =
+    TextEditingController();
+
+final confirmPasswordController =
+    TextEditingController();
+
+  String logoPath = '';
+  String signaturePath = '';
 
   @override
   void initState() {
@@ -49,26 +67,37 @@ class _SettingsScreenState
 
     gstController.text =
         settings.gstNumber;
+
+    logoPath =
+    settings.logoPath;
+    signaturePath =
+    settings.signaturePath;
   }
 
   Future<void> saveSettings() async {
-    final settings =
-        GarageSettingsModel(
-      garageName:
-          garageNameController.text.trim(),
-      ownerName:
-          ownerNameController.text.trim(),
-      phoneNumber:
-          phoneController.text.trim(),
-      address:
-          addressController.text.trim(),
-      gstNumber:
-          gstController.text.trim(),
-    );
+  final settings = GarageSettingsModel(
+    garageName:
+        garageNameController.text.trim(),
+    ownerName:
+        ownerNameController.text.trim(),
+    phoneNumber:
+        phoneController.text.trim(),
+    address:
+        addressController.text.trim(),
+    gstNumber:
+        gstController.text.trim(),
+    logoPath: logoPath,
+    signaturePath: signaturePath,
+    password:
+        SettingsService
+            .getSettings()
+            .password,
+  );
 
-    await SettingsService.saveSettings(
-      settings,
-    );
+  await SettingsService.saveSettings(
+    settings,
+  );
+
 
     if (!mounted) return;
 
@@ -81,6 +110,74 @@ class _SettingsScreenState
       ),
     );
   }
+
+  Future<void> changePassword() async {
+  final settings =
+      SettingsService.getSettings();
+
+  if (currentPasswordController.text.trim() !=
+      settings.password) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Current password is incorrect',
+        ),
+      ),
+    );
+    return;
+  }
+
+  if (newPasswordController.text.trim().isEmpty) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Enter a new password',
+        ),
+      ),
+    );
+    return;
+  }
+
+  if (newPasswordController.text.trim() !=
+      confirmPasswordController.text.trim()) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Passwords do not match',
+        ),
+      ),
+    );
+    return;
+  }
+
+  final updatedSettings =
+      settings.copyWith(
+    password:
+        newPasswordController.text.trim(),
+  );
+
+  await SettingsService.saveSettings(
+    updatedSettings,
+  );
+
+  currentPasswordController.clear();
+  newPasswordController.clear();
+  confirmPasswordController.clear();
+
+  if (!mounted) return;
+
+  ScaffoldMessenger.of(context)
+      .showSnackBar(
+    const SnackBar(
+      content: Text(
+        'Password Changed Successfully',
+      ),
+    ),
+  );
+}
 
   @override
   Widget build(BuildContext context) {
@@ -137,27 +234,245 @@ class _SettingsScreenState
 
           const SizedBox(height: 12),
 
-          TextField(
-            controller: gstController,
-            decoration:
-                const InputDecoration(
-              labelText: 'GST Number',
-              border:
-                  OutlineInputBorder(),
+         TextField(
+  controller: gstController,
+  decoration: const InputDecoration(
+    labelText: 'GST Number',
+    border: OutlineInputBorder(),
+  ),
+),
+
+const SizedBox(height: 12),
+
+SizedBox(
+  height: 55,
+  child: ElevatedButton(
+    onPressed: () async {
+      final picker =
+          ImagePicker();
+
+      final image =
+          await picker.pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (image == null) return;
+
+      setState(() {
+        logoPath = image.path;
+      });
+    },
+    child: const Text(
+      'SELECT LOGO',
+    ),
+  ),
+),
+
+const SizedBox(height: 12),
+
+if (logoPath.isNotEmpty)
+  Container(
+    height: 120,
+    padding: const EdgeInsets.all(8),
+    child: Image.file(
+      File(logoPath),
+    ),
+  ),
+
+const SizedBox(height: 12),
+
+SizedBox(
+  height: 55,
+  child: ElevatedButton(
+    onPressed: () async {
+      final picker = ImagePicker();
+
+      final image =
+          await picker.pickImage(
+        source: ImageSource.gallery,
+      );
+
+      if (image == null) return;
+
+      setState(() {
+        signaturePath = image.path;
+      });
+    },
+    child: const Text(
+      'SELECT SIGNATURE',
+    ),
+  ),
+),
+
+const SizedBox(height: 12),
+
+if (signaturePath.isNotEmpty)
+  Container(
+    height: 100,
+    padding: const EdgeInsets.all(8),
+    child: Image.file(
+      File(signaturePath),
+    ),
+  ),
+
+  const SizedBox(height: 20),
+
+SizedBox(
+  width: double.infinity,
+  height: 55,
+  child: ElevatedButton(
+    onPressed: saveSettings,
+    child: const Text(
+      'SAVE SETTINGS',
+    ),
+  ),
+),
+
+const SizedBox(height: 24),
+
+const Text(
+  'Security',
+  style: TextStyle(
+    fontSize: 20,
+    fontWeight: FontWeight.bold,
+  ),
+),
+
+const SizedBox(height: 12),
+
+TextField(
+  controller:
+      currentPasswordController,
+  obscureText: true,
+  decoration: const InputDecoration(
+    labelText: 'Current Password',
+  ),
+),
+
+const SizedBox(height: 12),
+
+TextField(
+  controller: newPasswordController,
+  obscureText: true,
+  decoration: const InputDecoration(
+    labelText: 'New Password',
+  ),
+),
+
+const SizedBox(height: 12),
+
+TextField(
+  controller:
+      confirmPasswordController,
+  obscureText: true,
+  decoration: const InputDecoration(
+    labelText: 'Confirm Password',
+  ),
+),
+
+const SizedBox(height: 12),
+
+const SizedBox(height: 20),
+
+Center(
+  child: SizedBox(
+    width: 220,
+    height: 50,
+    child: ElevatedButton(
+      onPressed: changePassword,
+      child: const Text(
+        'CHANGE PASSWORD',
+      ),
+    ),
+  ),
+),
+
+const SizedBox(height: 12),
+
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    SizedBox(
+      width: 150,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () async {
+          await BackupService.exportBackup();
+
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            const SnackBar(
+              content: Text('Backup Exported'),
             ),
-          ),
+          );
+        },
+        child: const Text(
+          'EXPORT BACKUP',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
 
-          const SizedBox(height: 20),
+    const SizedBox(width: 12),
 
-          SizedBox(
-            height: 55,
-            child: ElevatedButton(
-              onPressed: saveSettings,
-              child: const Text(
-                'SAVE SETTINGS',
+    SizedBox(
+      width: 150,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () async {
+          final restored =
+              await BackupService.restoreBackup();
+
+          if (!mounted) return;
+
+          ScaffoldMessenger.of(this.context).showSnackBar(
+            SnackBar(
+              content: Text(
+                restored
+                    ? 'Backup Restored'
+                    : 'Restore Cancelled',
               ),
             ),
-          ),
+          );
+
+          if (restored) {
+            ref
+                .read(invoiceProvider.notifier)
+                .loadInvoices();
+
+            setState(() {
+              final settings =
+                  SettingsService.getSettings();
+
+              garageNameController.text =
+                  settings.garageName;
+
+              ownerNameController.text =
+                  settings.ownerName;
+
+              phoneController.text =
+                  settings.phoneNumber;
+
+              addressController.text =
+                  settings.address;
+
+              gstController.text =
+                  settings.gstNumber;
+            });
+          }
+        },
+        child: const Text(
+          'RESTORE BACKUP',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
+  ],
+),
+
+
+
         ],
       ),
     );

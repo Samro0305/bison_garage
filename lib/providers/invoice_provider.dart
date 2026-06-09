@@ -13,25 +13,35 @@ class InvoiceNotifier
     state = InvoiceService.getAllInvoices();
   }
 
-  Future<void> addInvoice(
-    InvoiceModel invoice,
-  ) async {
-    await InvoiceService.saveInvoice(
-      invoice,
-    );
+Future<void> addInvoice(
+  InvoiceModel invoice,
+) async {
+  await InvoiceService.saveInvoice(
+    invoice,
+  );
 
-    loadInvoices();
-  }
+  loadInvoices();
+}
 
-  Future<void> deleteInvoice(
-    String invoiceId,
-  ) async {
-    await InvoiceService.deleteInvoice(
-      invoiceId,
-    );
+Future<void> updateInvoice(
+  InvoiceModel invoice,
+) async {
+  await InvoiceService.updateInvoice(
+    invoice,
+  );
 
-    loadInvoices();
-  }
+  loadInvoices();
+}
+
+Future<void> deleteInvoice(
+  String invoiceId,
+) async {
+  await InvoiceService.deleteInvoice(
+    invoiceId,
+  );
+
+  loadInvoices();
+}
 
   InvoiceModel? getInvoice(
     String invoiceId,

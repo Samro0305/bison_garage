@@ -4,24 +4,45 @@ import '../models/invoice_model.dart';
 
 class InvoiceTile extends StatelessWidget {
   final InvoiceModel invoice;
+  final int index;
   final VoidCallback onTap;
   final VoidCallback onDelete;
 
   const InvoiceTile({
     super.key,
     required this.invoice,
+    required this.index,
     required this.onTap,
     required this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    final invoiceNumber =
+    invoice.invoiceNumber;
+    
+
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
+      margin: const EdgeInsets.only(
+        bottom: 12,
+      ),
       child: ListTile(
         onTap: onTap,
-        title: Text(
-          invoice.customerName,
+        title: Column(
+          crossAxisAlignment:
+              CrossAxisAlignment.start,
+          children: [
+            Text(
+              invoice.customerName,
+            ),
+            Text(
+              invoiceNumber,
+              style: const TextStyle(
+                fontSize: 12,
+                color: Colors.grey,
+              ),
+            ),
+          ],
         ),
         subtitle: Text(
           invoice.vehicleNumber,

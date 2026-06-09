@@ -1,29 +1,95 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'edit_invoice_screen.dart';
+import 'customer_history_screen.dart';
+import 'package:hive/hive.dart';
 
+import '../../core/constants/hive_boxes.dart';
 import '../../models/garage_settings_model.dart';
-import '../../services/settings_service.dart';
-import '../../services/pdf_service.dart';
 import '../../models/invoice_model.dart';
+import '../../services/pdf_service_v2.dart';
+import '../../services/settings_service.dart';
 
 class InvoiceDetailsScreen extends StatelessWidget {
   final InvoiceModel invoice;
+  final int index;
 
   const InvoiceDetailsScreen({
     super.key,
     required this.invoice,
+    required this.index,
   });
 
-Future<void> generatePdf() async {
-  final GarageSettingsModel garage =
-    SettingsService.getSettings();
+  Future<void> generatePdf() async {
+    final GarageSettingsModel garage =
+        SettingsService.getSettings();
 
-  await PdfService.generateAndShareInvoice(
-    invoice,
-    garage,
+    await PdfServiceV2.generateAndShareInvoice(
+      invoice,
+      garage,
+    );
+  }
+
+Future<void> deleteInvoice(
+  BuildContext context,
+) async {
+  final confirmed =
+      await showDialog<bool>(
+    context: context,
+    builder: (_) => AlertDialog(
+      title: const Text(
+        'Delete Invoice',
+      ),
+      content: const Text(
+        'Are you sure you want to delete this invoice?',
+      ),
+      actions: [
+        TextButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              false,
+            );
+          },
+          child: const Text(
+            'Cancel',
+          ),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(
+              context,
+              true,
+            );
+          },
+          child: const Text(
+            'Delete',
+          ),
+        ),
+      ],
+    ),
   );
-}
 
+  if (confirmed != true) return;
+
+  final box =
+      Hive.box(HiveBoxes.invoicesBox);
+
+  await box.deleteAt(index);
+
+  if (context.mounted) {
+    Navigator.pop(context);
+
+    ScaffoldMessenger.of(context)
+        .showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Invoice Deleted',
+        ),
+      ),
+    );
+  }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -56,6 +122,9 @@ Future<void> generatePdf() async {
                   Text(
                     'Date: ${DateFormat('dd-MM-yyyy').format(invoice.createdAt)}',
                   ),
+                  Text(
+  'Invoice Number: ${invoice.invoiceNumber}',
+),
                 ],
               ),
             ),
@@ -138,17 +207,95 @@ Future<void> generatePdf() async {
             ),
           ),
 
-          const SizedBox(height: 30),
+         const SizedBox(height: 30),
 
-          SizedBox(
-            height: 55,
-            child: ElevatedButton(
-  onPressed: generatePdf,
-  child: const Text(
-    'GENERATE PDF',
-  ),
-)
+Row(
+  mainAxisAlignment: MainAxisAlignment.center,
+  children: [
+    SizedBox(
+      width: 150,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: generatePdf,
+        child: const Text(
+          'Generate PDF',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
+
+    const SizedBox(width: 12),
+
+    SizedBox(
+      width: 150,
+      height: 50,
+      child: ElevatedButton(
+        onPressed: () async {
+          await Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EditInvoiceScreen(
+                invoice: invoice,
+              ),
+            ),
+          );
+
+          if (context.mounted) {
+            Navigator.pop(context);
+          }
+        },
+        child: const Text(
+          'Edit Invoice',
+          textAlign: TextAlign.center,
+        ),
+      ),
+    ),
+  ],
+),
+
+const SizedBox(height: 12),
+
+Center(
+  child: SizedBox(
+    width: 220,
+    height: 50,
+    child: ElevatedButton(
+      onPressed: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => CustomerHistoryScreen(
+              customerName: invoice.customerName,
+            ),
           ),
+        );
+      },
+      child: const Text(
+        'Customer History',
+      ),
+    ),
+  ),
+),
+
+const SizedBox(height: 12),
+
+Center(
+  child: SizedBox(
+    width: 220,
+    height: 50,
+    child: ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.red,
+        foregroundColor: Colors.white,
+      ),
+      onPressed: () => deleteInvoice(context),
+      child: const Text(
+        'Delete Invoice',
+      ),
+    ),
+  ),
+),
+
         ],
       ),
     );

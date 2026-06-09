@@ -2,6 +2,7 @@ import 'service_item_model.dart';
 
 class InvoiceModel {
   final String invoiceId;
+  final String invoiceNumber;
   final String customerName;
   final String customerPhone;
   final String vehicleNumber;
@@ -18,6 +19,7 @@ class InvoiceModel {
 
   const InvoiceModel({
     required this.invoiceId,
+    required this.invoiceNumber,
     required this.customerName,
     required this.customerPhone,
     required this.vehicleNumber,
@@ -31,6 +33,7 @@ class InvoiceModel {
 
   InvoiceModel copyWith({
     String? invoiceId,
+    String? invoiceNumber,
     String? customerName,
     String? customerPhone,
     String? vehicleNumber,
@@ -43,6 +46,7 @@ class InvoiceModel {
   }) {
     return InvoiceModel(
       invoiceId: invoiceId ?? this.invoiceId,
+      invoiceNumber:   invoiceNumber ?? this.invoiceNumber,
       customerName: customerName ?? this.customerName,
       customerPhone: customerPhone ?? this.customerPhone,
       vehicleNumber: vehicleNumber ?? this.vehicleNumber,
@@ -58,6 +62,7 @@ class InvoiceModel {
   Map<String, dynamic> toMap() {
     return {
       'invoiceId': invoiceId,
+      'invoiceNumber': invoiceNumber,
       'customerName': customerName,
       'customerPhone': customerPhone,
       'vehicleNumber': vehicleNumber,
@@ -77,6 +82,9 @@ class InvoiceModel {
   ) {
     return InvoiceModel(
       invoiceId: map['invoiceId'] ?? '',
+      invoiceNumber:
+    map['invoiceNumber'] ??
+    'INV-0000',
       customerName: map['customerName'] ?? '',
       customerPhone: map['customerPhone'] ?? '',
       vehicleNumber: map['vehicleNumber'] ?? '',
