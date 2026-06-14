@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../services/firestore_invoice_service.dart';
 import '../../models/invoice_model.dart';
 import '../../models/service_item_model.dart';
-import '../../providers/invoice_provider.dart';
 import '../../widgets/service_item_tile.dart';
 
 class EditInvoiceScreen extends ConsumerStatefulWidget {
@@ -156,11 +156,10 @@ class _EditInvoiceScreenState
           widget.invoice.createdAt,
     );
 
-    await ref
-        .read(invoiceProvider.notifier)
-        .updateInvoice(
-          updatedInvoice,
-        );
+    await FirestoreInvoiceService
+    .updateInvoice(
+  updatedInvoice,
+);
 
     if (!mounted) return;
 

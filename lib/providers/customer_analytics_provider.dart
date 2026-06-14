@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/invoice_model.dart';
-import 'invoice_provider.dart';
+import 'firestore_invoice_list_provider.dart';
 
 class CustomerAnalytics {
   final String customerName;
@@ -18,7 +18,9 @@ class CustomerAnalytics {
 final topCustomerProvider =
     Provider<CustomerAnalytics?>((ref) {
   final List<InvoiceModel> invoices =
-      ref.watch(invoiceProvider);
+      ref.watch(
+  firestoreInvoiceListProvider,
+);
 
   if (invoices.isEmpty) {
     return null;
@@ -74,7 +76,9 @@ final topCustomerProvider =
 final topCustomersProvider =
     Provider<List<CustomerAnalytics>>((ref) {
   final List<InvoiceModel> invoices =
-      ref.watch(invoiceProvider);
+     ref.watch(
+  firestoreInvoiceListProvider,
+);
 
   final Map<String, CustomerAnalytics> customers =
       {};
@@ -123,8 +127,10 @@ final topCustomersProvider =
 
 final averageInvoiceValueProvider =
     Provider<double>((ref) {
-  final invoices =
-      ref.watch(invoiceProvider);
+ final invoices =
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   if (invoices.isEmpty) {
     return 0;
@@ -143,7 +149,9 @@ final averageInvoiceValueProvider =
 final highestInvoiceProvider =
     Provider<InvoiceModel?>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   if (invoices.isEmpty) {
     return null;
@@ -164,7 +172,9 @@ final highestInvoiceProvider =
 final topVehicleProvider =
     Provider<String?>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   if (invoices.isEmpty) {
     return null;
@@ -206,8 +216,10 @@ final topVehicleProvider =
 
 final totalCustomersProvider =
     Provider<int>((ref) {
-  final invoices =
-      ref.watch(invoiceProvider);
+ final invoices =
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   final Set<String> customers = {};
 
@@ -225,8 +237,10 @@ final totalCustomersProvider =
 
 final repeatCustomersProvider =
     Provider<int>((ref) {
-  final invoices =
-      ref.watch(invoiceProvider);
+ final invoices =
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   final Map<String, int> customerCount =
       {};
@@ -247,7 +261,9 @@ final repeatCustomersProvider =
 final bestCustomerProvider =
     Provider<CustomerAnalytics?>((ref) {
   final customers =
-      ref.watch(topCustomersProvider);
+      ref.watch(
+        topCustomersProvider,
+      );
 
   if (customers.isEmpty) {
     return null;

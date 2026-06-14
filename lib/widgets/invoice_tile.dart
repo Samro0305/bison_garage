@@ -6,14 +6,14 @@ class InvoiceTile extends StatelessWidget {
   final InvoiceModel invoice;
   final int index;
   final VoidCallback onTap;
-  final VoidCallback onDelete;
+  final VoidCallback? onDelete;
 
   const InvoiceTile({
     super.key,
     required this.invoice,
     required this.index,
     required this.onTap,
-    required this.onDelete,
+    this.onDelete,
   });
 
   @override
@@ -53,13 +53,15 @@ class InvoiceTile extends StatelessWidget {
             Text(
               '₹${invoice.grandTotal.toStringAsFixed(0)}',
             ),
+
+           if (onDelete != null)
             IconButton(
               onPressed: onDelete,
               icon: const Icon(
                 Icons.delete,
                 color: Colors.red,
-              ),
-            ),
+             ),
+           ),
           ],
         ),
       ),

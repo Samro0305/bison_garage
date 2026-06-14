@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
-
 import 'package:uuid/uuid.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../services/firestore_invoice_service.dart';
 import '../../providers/invoice_provider.dart';
-import '../../services/invoice_service.dart';
 import '../../models/invoice_model.dart';
 import '../../models/service_item_model.dart';
 import '../../widgets/service_item_tile.dart';
@@ -103,11 +102,14 @@ class _BillingScreenState
     );
   }
 
-  final invoice = InvoiceModel(
+  final invoiceNumber =
+    await FirestoreInvoiceService
+        .generateNextInvoiceNumber();
+
+final invoice = InvoiceModel(
   invoiceId: const Uuid().v4(),
-  invoiceNumber:
-    InvoiceService
-        .generateNextInvoiceNumber(),
+  invoiceNumber: invoiceNumber,
+  
     customerName: customerNameController.text.trim(),
     customerPhone: phoneController.text.trim(),
     vehicleNumber: vehicleController.text.trim(),

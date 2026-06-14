@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "353390083351",
+    "project_id": "bison-garage",
+    "storage_bucket": "bison-garage.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:353390083351:android:d3b08aa86806f875654b52",
+        "android_client_info": {
+          "package_name": "com.example.bison_garage"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAf0gshBTy9PGABSp9s23uw3s437rxzuEY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

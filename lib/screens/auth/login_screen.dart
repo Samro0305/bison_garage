@@ -1,31 +1,52 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/user_role.dart';
+import '../../providers/auth_provider.dart';
 import '../../services/settings_service.dart';
 import '../home/home_screen.dart';
 
-class LoginScreen extends StatefulWidget {
+class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
   @override
-  State<LoginScreen> createState() =>
+  ConsumerState<LoginScreen> createState() =>
       _LoginScreenState();
 }
 
 class _LoginScreenState
-    extends State<LoginScreen> {
-  final TextEditingController
-      passwordController =
+    extends ConsumerState<LoginScreen> {
+  final TextEditingController passwordController =
       TextEditingController();
+
+  UserRole selectedRole = UserRole.owner;
 
   void login() {
     final settings =
         SettingsService.getSettings();
 
-    final savedPassword =
+    final ownerPassword =
         settings.password;
 
-    if (passwordController.text.trim() ==
-        savedPassword) {
+    const staffPassword = 'bg1234';
+
+    bool isValid = false;
+
+    if (selectedRole == UserRole.owner) {
+      isValid =
+          passwordController.text.trim() ==
+              ownerPassword;
+    } else {
+      isValid =
+          passwordController.text.trim() ==
+              staffPassword;
+    }
+
+    if (isValid) {
+      ref
+          .read(authProvider.notifier)
+          .login(selectedRole);
+
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -97,7 +118,108 @@ class _LoginScreenState
                 ),
 
                 const SizedBox(
-                  height: 40,
+                  height: 30,
+                ),
+
+                Row(
+                  children: [
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedRole =
+                                UserRole.owner;
+                          });
+                        },
+                        child: Container(
+                          padding:
+                              const EdgeInsets
+                                  .all(16),
+                          decoration:
+                              BoxDecoration(
+                            color:
+                                selectedRole ==
+                                        UserRole
+                                            .owner
+                                    ? Colors.orange
+                                    : Colors.grey
+                                        .shade300,
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              12,
+                            ),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(
+                                Icons
+                                    .admin_panel_settings,
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'OWNER',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(
+                      width: 12,
+                    ),
+
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            selectedRole =
+                                UserRole.staff;
+                          });
+                        },
+                        child: Container(
+                          padding:
+                              const EdgeInsets
+                                  .all(16),
+                          decoration:
+                              BoxDecoration(
+                            color:
+                                selectedRole ==
+                                        UserRole
+                                            .staff
+                                    ? Colors.orange
+                                    : Colors.grey
+                                        .shade300,
+                            borderRadius:
+                                BorderRadius
+                                    .circular(
+                              12,
+                            ),
+                          ),
+                          child: const Column(
+                            children: [
+                              Icon(
+                                Icons.engineering,
+                              ),
+                              SizedBox(
+                                height: 8,
+                              ),
+                              Text(
+                                'STAFF',
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(
+                  height: 24,
                 ),
 
                 Container(
@@ -123,12 +245,14 @@ class _LoginScreenState
                         CrossAxisAlignment
                             .start,
                     children: [
-                      const Text(
-                        'Welcome Back',
+                      Text(
+                        selectedRole ==
+                                UserRole.owner
+                            ? 'Owner Login'
+                            : 'Staff Login',
                         style:
-                            TextStyle(
-                          fontSize:
-                              22,
+                            const TextStyle(
+                          fontSize: 22,
                           fontWeight:
                               FontWeight
                                   .bold,
@@ -144,8 +268,7 @@ class _LoginScreenState
                         style:
                             TextStyle(
                           color:
-                              Colors
-                                  .grey,
+                              Colors.grey,
                         ),
                       ),
 

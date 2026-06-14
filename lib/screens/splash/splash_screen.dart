@@ -1,7 +1,7 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 
+import '../../services/firestore_test_service.dart';
 import '../auth/login_screen.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -19,6 +19,8 @@ class _SplashScreenState
   @override
   void initState() {
     super.initState();
+
+    FirestoreTestService.testConnection();
 
     Timer(
       const Duration(milliseconds: 700),

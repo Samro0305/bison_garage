@@ -97,7 +97,7 @@ class RevenueChart extends StatelessWidget {
 
                   lineBarsData: [
                     LineChartBarData(
-                      isCurved: false,
+                      isCurved: true,
 
                       spots:
                           List.generate(

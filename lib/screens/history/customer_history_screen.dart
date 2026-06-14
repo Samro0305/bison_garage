@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 
-import '../../providers/invoice_provider.dart';
+import '../../providers/firestore_invoice_list_provider.dart';
 import 'invoice_details_screen.dart';
 
 class CustomerHistoryScreen
@@ -20,7 +20,9 @@ class CustomerHistoryScreen
     WidgetRef ref,
   ) {
     final allInvoices =
-        ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
     final customerInvoices =
         allInvoices.where(

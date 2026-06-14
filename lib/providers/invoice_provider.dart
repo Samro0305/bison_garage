@@ -1,64 +1,59 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/invoice_model.dart';
-import '../services/invoice_service.dart';
+import '../services/firestore_invoice_service.dart';
 
 class InvoiceNotifier
-    extends StateNotifier<List<InvoiceModel>> {
-  InvoiceNotifier() : super([]) {
-    loadInvoices();
-  }
+extends StateNotifier<List<InvoiceModel>> {
+InvoiceNotifier() : super([]);
 
-  void loadInvoices() {
-    state = InvoiceService.getAllInvoices();
-  }
+void loadInvoices() {}
 
 Future<void> addInvoice(
-  InvoiceModel invoice,
+InvoiceModel invoice,
 ) async {
-  await InvoiceService.saveInvoice(
-    invoice,
-  );
-
-  loadInvoices();
+await FirestoreInvoiceService
+.saveInvoice(
+invoice,
+);
 }
 
 Future<void> updateInvoice(
-  InvoiceModel invoice,
+InvoiceModel invoice,
 ) async {
-  await InvoiceService.updateInvoice(
-    invoice,
-  );
-
-  loadInvoices();
+await FirestoreInvoiceService
+.updateInvoice(
+invoice,
+);
 }
 
 Future<void> deleteInvoice(
-  String invoiceId,
+String invoiceId,
 ) async {
-  await InvoiceService.deleteInvoice(
-    invoiceId,
-  );
-
-  loadInvoices();
+await FirestoreInvoiceService
+.deleteInvoice(
+invoiceId,
+);
 }
 
-  InvoiceModel? getInvoice(
-    String invoiceId,
-  ) {
-    try {
-      return state.firstWhere(
-        (invoice) =>
-            invoice.invoiceId == invoiceId,
-      );
-    } catch (_) {
-      return null;
-    }
-  }
+InvoiceModel? getInvoice(
+String invoiceId,
+) {
+try {
+return state.firstWhere(
+(invoice) =>
+invoice.invoiceId ==
+invoiceId,
+);
+} catch (_) {
+return null;
+}
+}
 }
 
-final invoiceProvider = StateNotifierProvider<
-    InvoiceNotifier,
-    List<InvoiceModel>>(
-  (ref) => InvoiceNotifier(),
+final invoiceProvider =
+StateNotifierProvider<
+InvoiceNotifier,
+List<InvoiceModel>>(
+(ref) => InvoiceNotifier(),
 );

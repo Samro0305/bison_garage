@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../providers/firestore_invoice_list_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../providers/customer_analytics_provider.dart';
 import '../../providers/revenue_chart_provider.dart';
 import '../../widgets/revenue_chart.dart';
-import '../../providers/invoice_provider.dart';
 
 class DashboardScreen extends ConsumerWidget {
   const DashboardScreen({super.key});
@@ -57,7 +57,9 @@ final averageInvoice =
     ref.watch(revenueChartProvider);
 
     final invoices =
-    ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -198,7 +200,6 @@ Card(
         const SizedBox(height: 12),
 
         ...invoices
-            .reversed
             .take(5)
             .map(
               (invoice) => ListTile(

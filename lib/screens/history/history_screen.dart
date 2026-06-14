@@ -1,23 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'invoice_details_screen.dart';
 
 import '../../models/invoice_model.dart';
-import '../../providers/invoice_provider.dart';
 import '../../widgets/invoice_tile.dart';
-import 'invoice_details_screen.dart';
+import '../../providers/firestore_invoice_provider.dart';
 
 class HistoryScreen extends ConsumerStatefulWidget {
   const HistoryScreen({super.key});
 
   @override
-  ConsumerState<HistoryScreen> createState() =>
-      _HistoryScreenState();
+  ConsumerState<HistoryScreen> createState() => _HistoryScreenState();
 }
 
-class _HistoryScreenState
-    extends ConsumerState<HistoryScreen> {
-  final TextEditingController _searchController =
-      TextEditingController();
+class _HistoryScreenState extends ConsumerState<HistoryScreen> {
+  final TextEditingController _searchController = TextEditingController();
 
   String _searchQuery = '';
   String _filter = 'ALL';
@@ -30,16 +27,26 @@ class _HistoryScreenState
 
   @override
   Widget build(BuildContext context) {
-    final List<InvoiceModel> invoices =
-        ref.watch(invoiceProvider);
+    final invoicesAsync = ref.watch(firestoreInvoiceProvider);
 
-    final List<InvoiceModel> filteredInvoices =
-        invoices.where((invoice) {
-      final query =
-          _searchQuery.trim().toLowerCase();
+    return invoicesAsync.when(
+      loading: () => const Scaffold(
+        body: Center(
+          child: CircularProgressIndicator(),
+        ),
+      ),
+      error: (error, stack) => Scaffold(
+        body: Center(
+          child: Text(error.toString()),
+        ),
+      ),
+      data: (invoices) {
+        final List<InvoiceModel> filteredInvoices =
+            invoices.where((invoice) {
+          final query = _searchQuery.trim().toLowerCase();
 
-      bool matchesSearch =
-          query.isEmpty ||
+          bool matchesSearch =
+              query.isEmpty ||
               invoice.customerName
                   .toLowerCase()
                   .contains(query) ||
@@ -50,125 +57,99 @@ class _HistoryScreenState
                   .toLowerCase()
                   .contains(query);
 
-      final now = DateTime.now();
+          final now = DateTime.now();
 
-      bool matchesFilter = true;
+          bool matchesFilter = true;
 
-      switch (_filter) {
-        case 'TODAY':
-          matchesFilter =
-              invoice.createdAt.year ==
-                      now.year &&
-                  invoice.createdAt.month ==
-                      now.month &&
-                  invoice.createdAt.day ==
-                      now.day;
-          break;
+          switch (_filter) {
+            case 'TODAY':
+              matchesFilter =
+                  invoice.createdAt.year == now.year &&
+                  invoice.createdAt.month == now.month &&
+                  invoice.createdAt.day == now.day;
+              break;
 
-        case 'MONTH':
-          matchesFilter =
-              invoice.createdAt.year ==
-                      now.year &&
-                  invoice.createdAt.month ==
-                      now.month;
-          break;
+            case 'MONTH':
+              matchesFilter =
+                  invoice.createdAt.year == now.year &&
+                  invoice.createdAt.month == now.month;
+              break;
 
-        case 'YEAR':
-          matchesFilter =
-              invoice.createdAt.year ==
-                  now.year;
-          break;
+            case 'YEAR':
+              matchesFilter =
+                  invoice.createdAt.year == now.year;
+              break;
 
-        default:
-          matchesFilter = true;
-      }
+            default:
+              matchesFilter = true;
+          }
 
-      return matchesSearch &&
-          matchesFilter;
-    }).toList();
+          return matchesSearch && matchesFilter;
+        }).toList();
 
-    return Scaffold(
-      body: Column(
-        children: [
-          Padding(
-            padding:
-                const EdgeInsets.all(16),
-            child: Column(
-              children: [
-                TextField(
-                  controller:
-                      _searchController,
-                  decoration:
-                      InputDecoration(
-                    hintText:
-                        'Search Customer / Vehicle / Invoice',
-                    prefixIcon:
-                        const Icon(
-                      Icons.search,
-                    ),
-                    suffixIcon:
-                        _searchQuery.isNotEmpty
+        filteredInvoices.sort(
+          (a, b) => b.invoiceNumber.compareTo(a.invoiceNumber),
+        );
+
+        return Scaffold(
+          body: Column(
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Column(
+                  children: [
+                    TextField(
+                      controller: _searchController,
+                      decoration: InputDecoration(
+                        hintText:
+                            'Search Customer / Vehicle / Invoice',
+                        prefixIcon: const Icon(
+                          Icons.search,
+                        ),
+                        suffixIcon: _searchQuery.isNotEmpty
                             ? IconButton(
-                                icon:
-                                    const Icon(
+                                icon: const Icon(
                                   Icons.clear,
                                 ),
-                                onPressed:
-                                    () {
-                                  _searchController
-                                      .clear();
+                                onPressed: () {
+                                  _searchController.clear();
 
-                                  setState(
-                                    () {
-                                      _searchQuery =
-                                          '';
-                                    },
-                                  );
+                                  setState(() {
+                                    _searchQuery = '';
+                                  });
                                 },
                               )
                             : null,
-                    border:
-                        const OutlineInputBorder(),
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      _searchQuery =
-                          value;
-                    });
-                  },
-                ),
+                        border:
+                            const OutlineInputBorder(),
+                      ),
+                      onChanged: (value) {
+                        setState(() {
+                          _searchQuery = value;
+                        });
+                      },
+                    ),
 
-                const SizedBox(
-                  height: 10,
-                ),
+                    const SizedBox(height: 10),
 
-                SingleChildScrollView(
-                  scrollDirection:
-                      Axis.horizontal,
-                  child: Row(
-                    children: [
-                      _buildFilterButton(
-                        'ALL',
+                    SingleChildScrollView(
+                      scrollDirection:
+                          Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildFilterButton('ALL'),
+                          _buildFilterButton('TODAY'),
+                          _buildFilterButton('MONTH'),
+                          _buildFilterButton('YEAR'),
+                        ],
                       ),
-                      _buildFilterButton(
-                        'TODAY',
-                      ),
-                      _buildFilterButton(
-                        'MONTH',
-                      ),
-                      _buildFilterButton(
-                        'YEAR',
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          ),
+              ),
 
-          Expanded(
-            child:
-                filteredInvoices.isEmpty
+              Expanded(
+                child: filteredInvoices.isEmpty
                     ? const Center(
                         child: Text(
                           'No Invoices Found',
@@ -180,69 +161,47 @@ class _HistoryScreenState
                           horizontal: 16,
                         ),
                         itemCount:
-                            filteredInvoices
-                                .length,
+                            filteredInvoices.length,
                         itemBuilder:
-                            (
-                              context,
-                              index,
-                            ) {
+                            (context, index) {
                           final invoice =
-                              filteredInvoices[
-                                  index];
+                              filteredInvoices[index];
 
                           return InvoiceTile(
-                            invoice:
-                                invoice,
+                            invoice: invoice,
                             index: index,
                             onTap: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder:
-                                      (_) =>
-                                          InvoiceDetailsScreen(
-                                            invoice:
-                                                invoice,
-                                            index:
-                                                index,
-                                          ),
+                                  builder: (_) =>
+                                      InvoiceDetailsScreen(
+                                    invoice: invoice,
+                                    index: index,
+                                  ),
                                 ),
                               );
                             },
-                            onDelete:
-                                () async {
-                              await ref
-                                  .read(
-                                    invoiceProvider
-                                        .notifier,
-                                  )
-                                  .deleteInvoice(
-                                    invoice
-                                        .invoiceId,
-                                  );
-                            },
+                            onDelete: null,
                           );
                         },
                       ),
+              ),
+            ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 
-  Widget _buildFilterButton(
-    String value,
-  ) {
+  Widget _buildFilterButton(String value) {
     return Padding(
-      padding:
-          const EdgeInsets.only(
+      padding: const EdgeInsets.only(
         right: 8,
       ),
       child: ChoiceChip(
         label: Text(value),
-        selected:
-            _filter == value,
+        selected: _filter == value,
         onSelected: (_) {
           setState(() {
             _filter = value;

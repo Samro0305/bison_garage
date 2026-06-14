@@ -7,6 +7,7 @@ class GarageSettingsModel {
   final String logoPath;
   final String password;
   final String signaturePath;
+  final String lastBackupDate;
 
   const GarageSettingsModel({
     required this.garageName,
@@ -17,6 +18,7 @@ class GarageSettingsModel {
     required this.logoPath,
 required this.password,
 required this.signaturePath,
+required this.lastBackupDate,
   });
 
   factory GarageSettingsModel.empty() {
@@ -29,6 +31,7 @@ required this.signaturePath,
     logoPath: '',
     password: 'bison1234',
     signaturePath: '',
+    lastBackupDate: '',
   );
 }
 
@@ -41,6 +44,7 @@ required this.signaturePath,
     String? logoPath,
     String? password,
     String? signaturePath,
+    String? lastBackupDate,
     
   }) {
     return GarageSettingsModel(
@@ -53,6 +57,8 @@ required this.signaturePath,
       password: password ?? this.password,
       signaturePath:
     signaturePath ?? this.signaturePath,
+    lastBackupDate:
+    lastBackupDate ?? this.lastBackupDate,
     );
   }
 
@@ -66,6 +72,7 @@ required this.signaturePath,
       'logoPath': logoPath,
       'password': password,
       'signaturePath': signaturePath,
+      'lastBackupDate': lastBackupDate,
     };
   }
 
@@ -82,6 +89,8 @@ required this.signaturePath,
       password: map['password'] ?? 'bison1234',
       signaturePath:
     map['signaturePath'] ?? '',
+    lastBackupDate:
+    map['lastBackupDate'] ?? '',
     );
   }
 }

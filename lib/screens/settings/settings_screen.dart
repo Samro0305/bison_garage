@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'dart:io';
 import 'package:image_picker/image_picker.dart';
+import 'package:intl/intl.dart';
 
 import '../../providers/invoice_provider.dart';
 import '../../models/garage_settings_model.dart';
@@ -47,52 +48,123 @@ final confirmPasswordController =
   String signaturePath = '';
 
   @override
-  void initState() {
-    super.initState();
+void initState() {
+  super.initState();
 
-    final settings =
-        SettingsService.getSettings();
+  final settings =
+      SettingsService.getSettings();
 
-    garageNameController.text =
-        settings.garageName;
+  garageNameController.text =
+      settings.garageName;
 
-    ownerNameController.text =
-        settings.ownerName;
+  ownerNameController.text =
+      settings.ownerName;
 
-    phoneController.text =
-        settings.phoneNumber;
+  phoneController.text =
+      settings.phoneNumber;
 
-    addressController.text =
-        settings.address;
+  addressController.text =
+      settings.address;
 
-    gstController.text =
-        settings.gstNumber;
+  gstController.text =
+      settings.gstNumber;
 
-    logoPath =
-    settings.logoPath;
-    signaturePath =
-    settings.signaturePath;
+  logoPath =
+      settings.logoPath;
+
+  signaturePath =
+      settings.signaturePath;
+
+  if (settings.lastBackupDate.isNotEmpty) {
+    final lastBackup =
+        DateTime.parse(
+      settings.lastBackupDate,
+    );
+
+    final daysSinceBackup =
+        DateTime.now()
+            .difference(lastBackup)
+            .inDays;
+
+    if (daysSinceBackup >= 7) {
+      WidgetsBinding.instance
+          .addPostFrameCallback(
+        (_) {
+          if (!mounted) return;
+
+          showDialog(
+            context: context,
+            builder: (_) => AlertDialog(
+              title: const Text(
+                'Backup Reminder',
+              ),
+              content: const Text(
+                'It has been more than 7 days since your last backup.',
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.pop(
+                      context,
+                    );
+                  },
+                  child: const Text(
+                    'Later',
+                  ),
+                ),
+                ElevatedButton(
+                  onPressed: () async {
+                    Navigator.pop(
+                      context,
+                    );
+
+                    await BackupService
+                        .exportBackup();
+
+                    if (!mounted) {
+                      return;
+                    }
+
+                    ScaffoldMessenger.of(
+                      context,
+                    ).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Backup Exported',
+                        ),
+                      ),
+                    );
+
+                    setState(() {});
+                  },
+                  child: const Text(
+                    'Backup Now',
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    }
   }
+}
 
   Future<void> saveSettings() async {
   final settings = GarageSettingsModel(
-    garageName:
-        garageNameController.text.trim(),
-    ownerName:
-        ownerNameController.text.trim(),
-    phoneNumber:
-        phoneController.text.trim(),
-    address:
-        addressController.text.trim(),
-    gstNumber:
-        gstController.text.trim(),
-    logoPath: logoPath,
-    signaturePath: signaturePath,
-    password:
-        SettingsService
-            .getSettings()
-            .password,
-  );
+  garageName: garageNameController.text.trim(),
+  ownerName: ownerNameController.text.trim(),
+  phoneNumber: phoneController.text.trim(),
+  address: addressController.text.trim(),
+  gstNumber: gstController.text.trim(),
+  logoPath: logoPath,
+  signaturePath: signaturePath,
+  password: SettingsService.getSettings().password,
+  lastBackupDate:
+      SettingsService
+          .getSettings()
+          .lastBackupDate,
+);
 
   await SettingsService.saveSettings(
     settings,
@@ -389,6 +461,46 @@ Center(
 
 const SizedBox(height: 12),
 
+Builder(
+  builder: (context) {
+    final lastBackupDate =
+        SettingsService
+            .getSettings()
+            .lastBackupDate;
+
+    if (lastBackupDate.isEmpty) {
+      return const SizedBox();
+    }
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          children: [
+            const Icon(
+              Icons.backup,
+            ),
+            const SizedBox(
+              width: 12,
+            ),
+            Expanded(
+              child: Text(
+                'Last Backup:\n${DateFormat(
+  'dd MMM yyyy, hh:mm a',
+).format(
+  DateTime.parse(lastBackupDate),
+)}'
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  },
+),
+
+const SizedBox(height: 12),
+
 Row(
   mainAxisAlignment: MainAxisAlignment.center,
   children: [
@@ -437,9 +549,7 @@ Row(
           );
 
           if (restored) {
-            ref
-                .read(invoiceProvider.notifier)
-                .loadInvoices();
+           
 
             setState(() {
               final settings =
@@ -471,10 +581,15 @@ Row(
   ],
 ),
 
+const SizedBox(height: 20),
 
 
-        ],
-      ),
-    );
-  }
+
+      ],
+    ),
+  );
 }
+
+}
+
+

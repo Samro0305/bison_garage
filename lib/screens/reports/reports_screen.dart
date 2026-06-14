@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import '../../providers/invoice_provider.dart';
+import '../../providers/firestore_invoice_list_provider.dart';
 import '../../providers/customer_analytics_provider.dart';
 import '../../providers/dashboard_provider.dart';
 import '../../services/monthly_report_pdf_service.dart';
@@ -37,7 +37,9 @@ class ReportsScreen extends ConsumerWidget {
         ref.watch(topCustomersProvider);
 
     final invoices =
-    ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
 
 

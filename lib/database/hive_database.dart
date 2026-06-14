@@ -7,10 +7,6 @@ class HiveDatabase {
     await Hive.initFlutter();
 
     await Hive.openBox(
-      HiveBoxes.invoicesBox,
-    );
-
-    await Hive.openBox(
       HiveBoxes.settingsBox,
     );
 

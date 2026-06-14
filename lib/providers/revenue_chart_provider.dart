@@ -1,6 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'invoice_provider.dart';
+import 'firestore_invoice_list_provider.dart';
 
 class RevenuePoint {
   final String month;
@@ -14,7 +14,10 @@ class RevenuePoint {
 
 final revenueChartProvider =
     Provider<List<RevenuePoint>>((ref) {
-  final invoices = ref.watch(invoiceProvider);
+  final invoices =
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   final now = DateTime.now();
 

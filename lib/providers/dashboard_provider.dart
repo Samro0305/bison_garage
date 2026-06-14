@@ -1,12 +1,14 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'invoice_provider.dart';
+import 'firestore_invoice_list_provider.dart';
 
 
 final totalRevenueProvider =
     Provider<double>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
+      ref.watch(
+        firestoreInvoiceListProvider,
+      );
 
   return invoices.fold(
     0,
@@ -18,7 +20,9 @@ final totalRevenueProvider =
 final totalGstProvider =
     Provider<double>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   return invoices.fold(
     0,
@@ -30,15 +34,16 @@ final totalGstProvider =
 final totalInvoicesProvider =
     Provider<int>((ref) {
   return ref.watch(
-    invoiceProvider,
-  ).length;
+  firestoreInvoiceListProvider,
+).length;
 });
 
 final todayRevenueProvider =
     Provider<double>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
-
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
   final now = DateTime.now();
 
   return invoices
@@ -61,7 +66,9 @@ final todayRevenueProvider =
 final monthlyRevenueProvider =
     Provider<double>((ref) {
   final invoices =
-      ref.watch(invoiceProvider);
+    ref.watch(
+      firestoreInvoiceListProvider,
+    );
 
   final now = DateTime.now();
 
